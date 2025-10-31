@@ -1,4 +1,3 @@
-// frontend/src/App.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
@@ -12,17 +11,18 @@ interface Msg {
   sources?: string[];
 }
 
-/* ---------- Speech Recognition Types ---------- */
 declare global {
   interface Window {
     SpeechRecognition?: new () => SpeechRecognition;
     webkitSpeechRecognition?: new () => SpeechRecognition;
   }
 }
+
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
   resultIndex: number;
 }
+
 interface SpeechRecognition extends EventTarget {
   continuous: boolean;
   interimResults: boolean;
@@ -34,19 +34,32 @@ interface SpeechRecognition extends EventTarget {
   onend: () => void;
 }
 
-/* ---------- Main Component ---------- */
 export default function App() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [listening, setListening] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false); // check-mark flag
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const recRef = useRef<SpeechRecognition | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const successTimer = useRef<NodeJS.Timeout | null>(null);
 
-  /* ----- Voice Recognition ----- */
+  // Theme persistence
+  useEffect(() => {
+    const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    if (saved) setTheme(saved);
+    else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  // Voice Setup
   useEffect(() => {
     const SpeechRecognitionAPI =
       (window as any).webkitSpeechRecognition || window.SpeechRecognition;
@@ -58,7 +71,7 @@ export default function App() {
       rec.onresult = (e: SpeechRecognitionEvent) => {
         const transcript = Array.from(e.results)
           .slice(e.resultIndex)
-          .map((r) => r[0].transcript)
+          .map(r => r[0].transcript)
           .join('');
         setInput(transcript);
       };
@@ -78,21 +91,17 @@ export default function App() {
     setListening(!listening);
   };
 
-  /* ----- Upload ----- */
   const upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
     setUploadSuccess(false);
     const fd = new FormData();
     fd.append('file', file);
-
     try {
       await axios.post(`${API}/upload`, fd);
       setUploadSuccess(true);
-      setMsgs([]); // clear previous Q&A
-      // hide check-mark after 2 s
+      setMsgs([]);
       if (successTimer.current) clearTimeout(successTimer.current);
       successTimer.current = setTimeout(() => setUploadSuccess(false), 2000);
     } catch {
@@ -102,27 +111,25 @@ export default function App() {
     }
   };
 
-  /* ----- Ask ----- */
   const ask = async () => {
     if (!input.trim()) return;
     const q = input;
     setInput('');
-    setMsgs((m) => [...m, { question: q, answer: 'Thinking...' }]);
+    setMsgs(m => [...m, { question: q, answer: 'Thinking...' }]);
     try {
       const res = await axios.post(`${API}/ask`, { question: q });
-      setMsgs((m) => [
+      setMsgs(m => [
         ...m.slice(0, -1),
-        { question: q, answer: res.data.answer, sources: res.data.sources },
+        { question: q, answer: res.data.answer, sources: res.data.sources }
       ]);
     } catch (e: any) {
-      setMsgs((m) => [
+      setMsgs(m => [
         ...m.slice(0, -1),
-        { question: q, answer: 'Error: ' + (e.response?.data?.detail || e.message) },
+        { question: q, answer: 'Error: ' + (e.response?.data?.detail || e.message) }
       ]);
     }
   };
 
-  /* ----- PDF Export ----- */
   const downloadPDF = () => {
     const doc = new jsPDF();
     let y = 20;
@@ -141,27 +148,30 @@ export default function App() {
   };
 
   return (
-    <div className="app">
-      <h1>LLM RAG Assistant</h1>
+    <div className={`app ${theme}`}>
+      <div className="header">
+        <h1>LLM RAG Assistant</h1>
+        <button
+          className="theme-toggle"
+          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          title={theme === 'light' ? 'Enable Dark Mode' : 'Enable Light Mode'}
+        >
+          <span className="icon sun">Sun</span>
+          <span className="icon moon">Moon</span>
+        </button>
+      </div>
 
-      {/* ---------- Upload Box ---------- */}
       <div
         className={`upload ${uploading ? 'uploading' : ''} ${uploadSuccess ? 'success' : ''}`}
         onClick={() => fileRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
+        onDragOver={e => e.preventDefault()}
+        onDrop={e => {
           e.preventDefault();
           const file = e.dataTransfer.files[0];
           if (file) upload({ target: { files: [file] } } as any);
         }}
       >
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".pdf"
-          onChange={upload}
-          style={{ display: 'none' }}
-        />
+        <input ref={fileRef} type="file" accept=".pdf" onChange={upload} style={{ display: 'none' }} />
         {uploading ? (
           <div className="spinner">Uploading…</div>
         ) : uploadSuccess ? (
@@ -171,7 +181,6 @@ export default function App() {
         )}
       </div>
 
-      {/* ---------- Chat ---------- */}
       <div className="chat">
         <div className="msgs">
           {msgs.length === 0 && <p className="placeholder">Upload a PDF and ask!</p>}
@@ -181,10 +190,7 @@ export default function App() {
               <br />
               <strong>A:</strong> {m.answer}
               {m.sources && m.sources.length > 0 && (
-                <small>
-                  <br />
-                  Sources: {m.sources.join(', ')}
-                </small>
+                <small><br />Sources: {m.sources.join(', ')}</small>
               )}
             </div>
           ))}
@@ -193,15 +199,11 @@ export default function App() {
         <div className="input">
           <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), ask())
-            }
+            onChange={e => setInput(e.target.value)}
+            onKeyPress={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), ask())}
             placeholder="Ask about the PDF..."
           />
-          <button onClick={ask} disabled={!input.trim()}>
-            Send
-          </button>
+          <button onClick={ask} disabled={!input.trim()}>Send</button>
           <button onClick={toggleVoice} disabled={!recRef.current}>
             {listening ? 'Stop' : 'Voice'}
           </button>
