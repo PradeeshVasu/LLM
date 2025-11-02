@@ -109,6 +109,18 @@ This project integrates:
 - At the top of the LM Studio, press the "Select a model to Load" and select "google/gemma-3n-e4b" and it will load the model
 - Go to developer mode by pressing the icon on the left column of the LM Studio and press the "Staus: Stopped" then the server will starts to run
 
+### LM Studio Setup Reference
+
+<img width="1919" height="1138" alt="Screenshot 2025-11-02 200431" src="https://github.com/user-attachments/assets/cfb4e64d-704d-4b58-8897-d8734d28033d" />
+
+<img width="1919" height="1139" alt="Screenshot 2025-11-02 200500" src="https://github.com/user-attachments/assets/f679ea5e-cdc3-4cde-bc3d-6fabca70a04f" />
+
+<img width="1919" height="1137" alt="Screenshot 2025-11-02 200649" src="https://github.com/user-attachments/assets/c4758186-2784-4f8d-9246-1d0c388198f8" />
+
+<img width="1919" height="1139" alt="Screenshot 2025-11-02 200708" src="https://github.com/user-attachments/assets/e6087ac8-d6f4-4cd3-8a99-1b3def57484c" />
+
+
+
 ### 🧩 Backend Setup
 
 1️⃣ **Navigate to backend**
