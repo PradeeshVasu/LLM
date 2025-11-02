@@ -102,7 +102,7 @@ This project integrates:
 
 ###  LM Studio Setup
 
-- Download the LM Studio from the web
+- Download the LM Studio from the web based on your system Operating system(windows,Linux,mac os) by using this link: [https://lmstudio.ai/download](https://lmstudio.ai/docs/app/basics/download-model)
 - install LM Studio into your system
 - Open the LM Studio ans press the search icon on the left side
 - Now, you can find lots of models there type "google/gemma-3n-e4b" and download it
