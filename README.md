@@ -22,11 +22,13 @@ The application allows users to:
 This project integrates:
 - A **FastAPI backend** for PDF ingestion, embedding, and RAG logic  
 - A **React + TypeScript frontend** for a dynamic, user-friendly experience
+- A **LM Studio is used to download and load the model(google/gemma-3n-e4b), by switching on the sever icon in the LM Studio we can integrate with the model
 
 ---
 
 ## 🚀 Key Features
 
+✅ **LLM model: google/gemma-3n-e4b** — used to generate the result
 ✅ **PDF Upload and Parsing** — Extracts text using advanced PDF parsers  
 ✅ **Retrieval-Augmented Generation (RAG)** — Combines LLM reasoning with vector search  
 ✅ **Voice Interaction** — Accepts and responds via speech  
@@ -97,6 +99,15 @@ This project integrates:
 ---
 
 ## ⚙️ Installation & Setup
+
+###  LM Studio Setup
+
+- Download the LM Studio from the web
+- install LM Studio into your system
+- Open the LM Studio ans press the search icon on the left side
+- Now, you can find lots of models there type "google/gemma-3n-e4b" and download it
+- At the top of the LM Studio, press the "Select a model to Load" and select "google/gemma-3n-e4b" and it will load the model
+- go to developer mode by pressing the icon on the left column of the LM Studio and press the "Staus: Stopped" then the server will starts to run
 
 ### 🧩 Backend Setup
 
