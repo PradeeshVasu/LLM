@@ -238,7 +238,3 @@ If you like this project, please ⭐ **star this repository** on GitHub and shar
 | **LangChain** | 0.2+    |
 
 ---
----
-> 💡 *Developed with passion for AI & Education by **Pradeesh Vasu*** ❤️
-
-```
