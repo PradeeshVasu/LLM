@@ -28,7 +28,7 @@ This project integrates:
 
 ## 🚀 Key Features
 
-✅ **LLM model: google/gemma-3n-e4b** — used to generate the result
+✅ **LLM model: google/gemma-3n-e4b** — used to generate the result                           
 ✅ **PDF Upload and Parsing** — Extracts text using advanced PDF parsers  
 ✅ **Retrieval-Augmented Generation (RAG)** — Combines LLM reasoning with vector search  
 ✅ **Voice Interaction** — Accepts and responds via speech  
