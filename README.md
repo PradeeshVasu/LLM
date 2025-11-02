@@ -103,11 +103,11 @@ This project integrates:
 ###  LM Studio Setup
 
 - Download the LM Studio from the web based on your system Operating system(windows,Linux,mac os) by using this link: [https://lmstudio.ai/download](https://lmstudio.ai/docs/app/basics/download-model)
-- install LM Studio into your system
+- Install LM Studio into your system
 - Open the LM Studio ans press the search icon on the left side
 - Now, you can find lots of models there type "google/gemma-3n-e4b" and download it
 - At the top of the LM Studio, press the "Select a model to Load" and select "google/gemma-3n-e4b" and it will load the model
-- go to developer mode by pressing the icon on the left column of the LM Studio and press the "Staus: Stopped" then the server will starts to run
+- Go to developer mode by pressing the icon on the left column of the LM Studio and press the "Staus: Stopped" then the server will starts to run
 
 ### 🧩 Backend Setup
 
