@@ -208,7 +208,7 @@ REACT_APP_API_URL=http://127.0.0.1:8000
 
 ## 👨‍💻 Author
 
-**Pradeesh Vasu**
+**Pradeesh Vasu**                       
 📧 Email: [pradeeshvasu22@gmail.com](mailto:pradeeshvasu22@gmail.com)              
 🔗 LinkedIn: [linkedin.com/in/pradeesh-vasu-03486b319](https://www.linkedin.com/in/pradeesh-vasu-03486b319)                  
 🐙 GitHub: [github.com/PradeeshVasu](https://github.com/PradeeshVasu)
