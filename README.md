@@ -22,7 +22,7 @@ The application allows users to:
 This project integrates:
 - A **FastAPI backend** for PDF ingestion, embedding, and RAG logic  
 - A **React + TypeScript frontend** for a dynamic, user-friendly experience
-- A **LM Studio is used to download and load the model(google/gemma-3n-e4b), by switching on the sever icon in the LM Studio we can integrate with the model
+- A **LM Studio** for download and load the model(google/gemma-3n-e4b), by switching on the sever icon in the LM Studio we can integrate with the model
 
 ---
 
