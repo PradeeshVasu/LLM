@@ -150,13 +150,6 @@ Built with passion for AI + UX
 
 ---
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=vasu-llm/rag-assistant&type=Date)](https://star-history.com/#vasu-llm/rag-assistant)
-
----
-
 **Made with React, TypeScript, and Voice**  
 *Your AI companion, now with a face and a voice.*
 ```
-
