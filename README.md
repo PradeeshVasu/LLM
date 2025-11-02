@@ -200,6 +200,11 @@ REACT_APP_API_URL=http://127.0.0.1:8000
 
 <img width="1919" height="1134" alt="Screenshot 2025-11-02 141425" src="https://github.com/user-attachments/assets/2b2a8bd3-0e7c-4007-9c10-60948645a9fc" />
 
+<img width="1914" height="1132" alt="Screenshot 2025-11-02 143305" src="https://github.com/user-attachments/assets/82d79244-c84e-4ab9-b18b-055ddc7ef151" />
+
+<img width="1919" height="1127" alt="Screenshot 2025-11-02 143326" src="https://github.com/user-attachments/assets/b18357d2-a78f-4fa8-b232-b88685ab11d2" />
+
+
 <img width="1915" height="1136" alt="Screenshot 2025-11-02 142343" src="https://github.com/user-attachments/assets/ec5a8383-3e1b-4b1c-a481-039a97377b7a" />
 
 <img width="1919" height="1131" alt="Screenshot 2025-11-02 142438" src="https://github.com/user-attachments/assets/18196a5d-ab5a-40e3-92f2-45292270ba40" />
