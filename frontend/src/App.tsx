@@ -38,6 +38,7 @@ export default function App() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [listening, setListening] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -45,8 +46,10 @@ export default function App() {
   const recRef = useRef<SpeechRecognition | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const successTimer = useRef<NodeJS.Timeout | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const robotRef = useRef<HTMLImageElement>(null);
 
-  // Theme persistence
+  // Theme
   useEffect(() => {
     const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
     if (saved) setTheme(saved);
@@ -59,7 +62,7 @@ export default function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Voice Setup
+  // Voice Input
   useEffect(() => {
     const SpeechRecognitionAPI =
       (window as any).webkitSpeechRecognition || window.SpeechRecognition;
@@ -82,15 +85,45 @@ export default function App() {
   }, []);
 
   const toggleVoice = () => {
-    if (!recRef.current) return;
-    if (listening) recRef.current.stop();
-    else {
-      setInput('');
-      recRef.current.start();
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
     }
-    setListening(!listening);
+    if (listening) {
+      recRef.current?.stop();
+      setListening(false);
+    } else {
+      setInput('');
+      recRef.current?.start();
+      setListening(true);
+    }
   };
 
+  // Speak Answer
+  const speak = (text: string) => {
+    if (speaking) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.9;
+    utterance.onstart = () => {
+      setSpeaking(true);
+      if (robotRef.current) robotRef.current.classList.add('speaking');
+    };
+    utterance.onend = () => {
+      setSpeaking(false);
+      if (robotRef.current) robotRef.current.classList.remove('speaking');
+    };
+    utterance.onerror = () => {
+      setSpeaking(false);
+      if (robotRef.current) robotRef.current.classList.remove('speaking');
+    };
+    utteranceRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Upload
   const upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -111,6 +144,7 @@ export default function App() {
     }
   };
 
+  // Ask
   const ask = async () => {
     if (!input.trim()) return;
     const q = input;
@@ -118,18 +152,22 @@ export default function App() {
     setMsgs(m => [...m, { question: q, answer: 'Thinking...' }]);
     try {
       const res = await axios.post(`${API}/ask`, { question: q });
+      const answer = res.data.answer;
       setMsgs(m => [
         ...m.slice(0, -1),
-        { question: q, answer: res.data.answer, sources: res.data.sources }
+        { question: q, answer, sources: res.data.sources }
       ]);
+      speak(answer);
     } catch (e: any) {
+      const err = 'Error: ' + (e.response?.data?.detail || e.message);
       setMsgs(m => [
         ...m.slice(0, -1),
-        { question: q, answer: 'Error: ' + (e.response?.data?.detail || e.message) }
+        { question: q, answer: err }
       ]);
     }
   };
 
+  // PDF Export
   const downloadPDF = () => {
     const doc = new jsPDF();
     let y = 20;
@@ -154,60 +192,84 @@ export default function App() {
         <button
           className="theme-toggle"
           onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          title={theme === 'light' ? 'Enable Dark Mode' : 'Enable Light Mode'}
+          title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
         >
           <span className="icon sun">Sun</span>
           <span className="icon moon">Moon</span>
         </button>
       </div>
 
-      <div
-        className={`upload ${uploading ? 'uploading' : ''} ${uploadSuccess ? 'success' : ''}`}
-        onClick={() => fileRef.current?.click()}
-        onDragOver={e => e.preventDefault()}
-        onDrop={e => {
-          e.preventDefault();
-          const file = e.dataTransfer.files[0];
-          if (file) upload({ target: { files: [file] } } as any);
-        }}
-      >
-        <input ref={fileRef} type="file" accept=".pdf" onChange={upload} style={{ display: 'none' }} />
-        {uploading ? (
-          <div className="spinner">Uploading…</div>
-        ) : uploadSuccess ? (
-          <div className="check">Uploaded</div>
-        ) : (
-          'Upload PDF (click or drag)'
-        )}
-      </div>
-
-      <div className="chat">
-        <div className="msgs">
-          {msgs.length === 0 && <p className="placeholder">Upload a PDF and ask!</p>}
-          {msgs.map((m, i) => (
-            <div key={i} className="msg">
-              <strong>Q:</strong> {m.question}
-              <br />
-              <strong>A:</strong> {m.answer}
-              {m.sources && m.sources.length > 0 && (
-                <small><br />Sources: {m.sources.join(', ')}</small>
-              )}
-            </div>
-          ))}
+      <div className="main">
+        {/* Left: Robot */}
+        <div className="robot-panel">
+          <img
+            ref={robotRef}
+            src="/robot.png"
+            alt="AI Assistant"
+            className="robot-avatar"
+            onError={(e) => {
+              console.error("Robot image failed to load. Check: public/robot.png");
+              e.currentTarget.src = 'https://www.freepik.com/free-vector/graident-ai-robot-vectorart_125887871.htm#fromView=keyword&page=1&position=13&uuid=7f9c0f87-e5f2-4395-9c18-95cfa3151393&query=Robot+avatar';
+            }}
+          />
+          <div className={`robot-status ${listening ? 'listening' : speaking ? 'speaking' : ''}`}>
+            {listening ? 'Listening...' : speaking ? 'Speaking...' : 'Ready'}
+          </div>
         </div>
 
-        <div className="input">
-          <textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyPress={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), ask())}
-            placeholder="Ask about the PDF..."
-          />
-          <button onClick={ask} disabled={!input.trim()}>Send</button>
-          <button onClick={toggleVoice} disabled={!recRef.current}>
-            {listening ? 'Stop' : 'Voice'}
-          </button>
-          {msgs.length > 0 && <button onClick={downloadPDF}>Download PDF</button>}
+        {/* Right: Chat */}
+        <div className="chat-panel">
+          <div
+            className={`upload ${uploading ? 'uploading' : ''} ${uploadSuccess ? 'success' : ''}`}
+            onClick={() => fileRef.current?.click()}
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => {
+              e.preventDefault();
+              const file = e.dataTransfer.files[0];
+              if (file) upload({ target: { files: [file] } } as any);
+            }}
+          >
+            <input ref={fileRef} type="file" accept=".pdf" onChange={upload} style={{ display: 'none' }} />
+            {uploading ? (
+              <div className="spinner">Uploading…</div>
+            ) : uploadSuccess ? (
+              <div className="check">Uploaded</div>
+            ) : (
+              'Upload PDF (click or drag)'
+            )}
+          </div>
+
+          <div className="msgs">
+            {msgs.length === 0 && <p className="placeholder">Upload a PDF and ask!</p>}
+            {msgs.map((m, i) => (
+              <div key={i} className="msg">
+                <strong>Q:</strong> {m.question}
+                <br />
+                <strong>A:</strong> {m.answer}
+                {m.sources && m.sources.length > 0 && (
+                  <small><br />Sources: {m.sources.join(', ')}</small>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="input">
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyPress={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), ask())}
+              placeholder="Ask about the PDF..."
+            />
+            <button onClick={ask} disabled={!input.trim()}>Send</button>
+            <button
+              className={`speak-btn ${speaking ? 'speaking' : ''}`}
+              onClick={toggleVoice}
+              disabled={!recRef.current && !speaking}
+            >
+              {listening ? 'Mic On' : speaking ? 'Stop' : 'Speak'}
+            </button>
+            {msgs.length > 0 && <button onClick={downloadPDF}>Download PDF</button>}
+          </div>
         </div>
       </div>
     </div>
